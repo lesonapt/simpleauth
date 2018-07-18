@@ -8,8 +8,16 @@ const userMockData = {
     password: 'bar',
     userId: 1
 };
+
+const permission = [];
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 app.get('/', (req, res) => {
     res.status(200);
@@ -33,7 +41,7 @@ app.post('/authen/v1/login',(req, res) => {
     try{
         let username = req.body.username;
         let password = req.body.password;
-        let exp = Math.floor(Date.now() / 1000) + (60 * 60);
+        let exp = Math.floor(Date.now() / 1000) + (1 * 30);
 
         if(username != userMockData.username || password != userMockData.password){
             res.status(403);
@@ -44,7 +52,7 @@ app.post('/authen/v1/login',(req, res) => {
         }
 
         let userInfoEncode = {
-            roles: 'admin',
+            roles: ['admin', 'user'],
             permissions: ['order', 'update_order', 'by', 'sell'],
             userId: userMockData.userId,
         }
