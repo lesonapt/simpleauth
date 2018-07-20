@@ -3,11 +3,30 @@ const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser');
 const app = express();
 const secretKey = 'randomscrectkey';
-const userMockData = {
-    username: 'foo',
-    password: 'bar',
-    userId: 1
-};
+const userMockData = [
+    {
+        fullname: 'Nguyễn Xuân Minh',
+        TCBSId: '000000',
+        CustodyId: '105C888888'
+    },
+    {
+        fullname: 'Nguyễn Đăng Minh',
+        TCBSId: '000001',
+        CustodyId: '105C234567'
+    },
+    {
+        fullname: 'Trần Nhật Nam',
+        TCBSId: '000002',
+        CustodyId: '105C999999'
+    },
+    {
+        fullname: 'Nguyễn Hải Dương',
+        TCBSId: '000003',
+        CustodyId: '105C123456'
+    }
+
+];
+
 
 const permission = [];
 app.use(bodyParser.json());
@@ -42,8 +61,19 @@ app.post('/authen/v1/login',(req, res) => {
         let username = req.body.username;
         let password = req.body.password;
         let exp = Math.floor(Date.now() / 1000) + (1 * 30);
+        let size = userMockData.length;
+        let pass = false;
+        let user = {};
 
-        if(username != userMockData.username || password != userMockData.password){
+        for( let i = 0; i< size; i++){
+
+            if(userMockData[i].CustodyId == username){
+                user = userMockData[i];
+                pass = true;
+            }
+        }
+
+        if( !pass || password != '123456'){
             res.status(403);
             res.json({
                 code: '400',
@@ -52,18 +82,19 @@ app.post('/authen/v1/login',(req, res) => {
         }
 
         let userInfoEncode = {
-            roles: ['admin', 'user'],
+            roles: ['admin'],
             permissions: ['order', 'update_order', 'by', 'sell'],
-            userId: userMockData.userId,
+            fullname: user.fullname,
+            TCBSId: user.TCBSId,
+            fullname: user.fullname,
+            CustodyId: user.CustodyId,
         }
 
         jwt.sign({data: userInfoEncode, exp: exp}, secretKey, (err, token) => {
-            res.json({
-                username: username,
-                token: token,
-                exp: exp
-            });
+            userInfoEncode.token = token
+            res.json(userInfoEncode);
         })
+
     } catch(error) {
         res.status(500);
         res.json({
